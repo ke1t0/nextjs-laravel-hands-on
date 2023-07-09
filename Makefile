@@ -3,7 +3,7 @@ init:
 	docker-compose up -d --build
 	docker-compose exec api composer install
 	docker-compose exec api php artisan key:generate
-	docker-compose exec api php artisan migrate --seed
+	docker-compose exec api php artisan migrate:fresh --seed
 	docker-compose exec front yarn
 	docker-compose exec front yarn dev
 

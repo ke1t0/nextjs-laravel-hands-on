@@ -45,8 +45,8 @@ services:
     environment:
       MYSQL_DATABASE: next_laravel
       MYSQL_USER: sample
-      MYSQL_PASSWORD: sample
-      MYSQL_ROOT_PASSWORD: sample
+      MYSQL_PASSWORD: $DB_PASSWORD
+      MYSQL_ROOT_PASSWORD: $DB_PASSWORD
       TZ: "Asia/Tokyo"
     volumes:
       - db-volume:/var/lib/mysql:cached

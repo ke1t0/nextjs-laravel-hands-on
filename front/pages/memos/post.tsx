@@ -10,16 +10,18 @@ type MemoForm = {
   body: string;
 };
 
+type Validation = {
+  title?: string;
+  body?: string;
+};
+
 const Post: NextPage = () => {
   const router = useRouter();
   const [memoForm, setMemoForm] = useState<MemoForm>({
     title: '',
     body: '',
   });
-  const [validation, setValidation] = useState<MemoForm>({
-    title: '',
-    body: '',
-  });
+  const [validation, setValidation] = useState<Validation>({});
 
   const updateMemoForm = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -31,6 +33,8 @@ const Post: NextPage = () => {
   };
 
   const creatememo = () => {
+    setValidation({});
+
     axiosApi.get('/sanctum/csrf-cookie').then((res) => {
       axiosApi
         .post('/api/memos', memoForm)
@@ -39,7 +43,22 @@ const Post: NextPage = () => {
           router.push('/memos');
         })
         .catch((err: AxiosError) => {
-          console.log(err.response);
+          if (err.response?.status === 422) {
+            const data = err.response?.data as any;
+            const errors = data.errors;
+            // state更新用のオブジェクトを別で定義
+            const validationMessages: { [index: string]: string } =
+              {} as Validation;
+            Object.keys(errors).map((key: string) => {
+              validationMessages[key] = errors[key][0];
+            });
+            // state更新用オブジェクトに更新
+            setValidation(validationMessages);
+          }
+          if (err.response?.status === 500) {
+            alert('システムエラーです！！');
+          }
+          // ここまで修正
         });
     });
   };
@@ -58,6 +77,9 @@ const Post: NextPage = () => {
             name='title'
             onChange={updateMemoForm}
           />
+          {validation.title && (
+            <p className='py-3 text-red-500'>{validation.title}</p>
+          )}
         </div>
         <div className='mb-5'>
           <div className='flex justify-start my-2'>
@@ -71,6 +93,9 @@ const Post: NextPage = () => {
             rows={4}
             onChange={updateMemoForm}
           />
+          {validation.body && (
+            <p className='py-3 text-red-500'>{validation.body}</p>
+          )}
         </div>
         <div className='text-center'>
           <button

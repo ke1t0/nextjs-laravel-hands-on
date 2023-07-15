@@ -24,7 +24,7 @@ class MemoController extends Controller
         }
 
         try {
-            $memos = Memo::where('user_id', $id)->get();
+            $memos = Memo::where('user_id', $id)->latest()->get();
         } catch (Exception $e) {
             throw $e;
         }
@@ -39,6 +39,19 @@ class MemoController extends Controller
      */
     public function create(MemoPostRequest $request): JsonResponse
     {
-        // 処理
+        try {
+            $memo = new Memo();
+            $memo->user_id = Auth::id();
+            $memo->title = $request->title;
+            $memo->body = $request->body;
+
+            $memo->save();
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+        return response()->json([
+            'message' => 'メモの登録に成功しました'
+        ], 201);
     }
 }
